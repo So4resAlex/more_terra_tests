@@ -6,9 +6,7 @@ resource "aws_sqs_queue" "terraform_queue" {
   message_retention_seconds  = 1209600
   max_message_size           = 2048
   tags = {
-    Name = var.queue_name
-    Enviroment = var.enviroment
-    Manager = "Terraform"
+    Eviroment = "Test"
   }
 }
 
@@ -21,10 +19,9 @@ resource "aws_sqs_queue_policy" "terraform_queue_policy" {
       {
         Effect = "Allow"
         Principal = {
-          AWS = var.user_arn
+          AWS = var.receiver_user_arn #TODO Receive user arn
         }
         Action = [
-          "sqs:SendMessage",
           "sqs:ChangeMessageVisibility",
           "sqs:DeleteMessage",
           "sqs:ReceiveMessage",
@@ -33,6 +30,18 @@ resource "aws_sqs_queue_policy" "terraform_queue_policy" {
         ]
         Resource = aws_sqs_queue.terraform_queue.arn
       },
+      {
+        Effect = "Allow"
+        Principal = {
+          AWS = var.sender_user_arn #TODO Sender user arn
+        }
+        Action = [
+          "sqs:SendMessage",
+          "sqs:GetQueueUrl",
+          "sqs:GetQueueAttributes"
+        ]
+        Resource = aws_sqs_queue.terraform_queue.arn
+      }
     ]
   })
 }
